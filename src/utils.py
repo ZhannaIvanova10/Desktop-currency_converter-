@@ -1,8 +1,9 @@
 import json
-from typing import List, Dict, Any
+from typing import List, Dict
 
-def read_json_file(file_path: str) -> List[Dict[str, Any]]:
-    """Читает JSON-файл и возвращает список словарей."""
+
+def load_transactions(file_path: str) -> List[Dict]:
+    """Загружает транзакции из JSON-файла и возвращает список словарей."""
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
