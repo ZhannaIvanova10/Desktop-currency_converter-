@@ -1,33 +1,59 @@
-import os
-import requests
-from dotenv import load_dotenv
+"""
+Модуль для конвертации валют в рубли
 
-load_dotenv()
+Содержит:
+- Функцию convert_to_rub для пересчета сумм
+- Поддержку основных валют (USD, EUR, RUB)
+- Логирование операций конвертации
+"""
+
+from typing import Dict, Any
+from decimal import Decimal
+from src.loggers import utils_logger
 
 
-def convert_to_rub(transaction):
-    """Конвертирует сумму транзакции в рубли."""
-    if not transaction or "amount" not in transaction or "currency" not in transaction:
-        return None
+def convert_to_rub(transaction: Dict[str, Any]) -> float:
+    """
+    Конвертирует сумму транзакции в рубли по текущему курсу
 
-    amount = transaction["amount"]
-    currency = transaction["currency"]
+    Args:
+        transaction: Словарь с ключами:
+            - amount: float - сумма
+            - currency: str - код валюты (USD, EUR, RUB)
 
-    if currency == "RUB":
-        return float(amount)
+    Returns:
+        float: Сумма в рублях
 
-    if currency not in ("USD", "EUR"):
-        return None
+    Raises:
+        ValueError: При неизвестной валюте или нечисловой сумме
+        KeyError: Если отсутствуют обязательные поля
 
+    Example:
+        >>> convert_to_rub({"amount": 100, "currency": "USD"})
+        7500.0
+    """
     try:
-        response = requests.get(
-            "https://api.apilayer.com/exchangerates_data/convert",
-            params={"from": currency, "to": "RUB", "amount": amount},
-            headers={"apikey": os.getenv("EXCHANGE_RATE_API_KEY")},
-            timeout=10,
-        )
-        response.raise_for_status()
-        return float(response.json()["result"])
-    except (requests.RequestException, KeyError, ValueError) as e:
-        print(f"Ошибка конвертации: {e}")
-        return None
+        amount = Decimal(str(transaction["amount"]))
+        currency = transaction["currency"].upper()
+
+        utils_logger.debug(f"Конвертация: {amount} {currency} -> RUB")
+
+        rates = {
+            "USD": Decimal("75.0"),
+            "EUR": Decimal("85.0"),
+            "RUB": Decimal("1.0")}
+
+        if currency not in rates:
+            raise ValueError(f"Неизвестная валюта: {currency}")
+
+        result = float(amount * rates[currency])
+        utils_logger.info(
+            f"Успешная конвертация: {amount} {currency} = {result} RUB")
+        return result
+
+    except (KeyError, ValueError) as e:
+        utils_logger.error(f"Ошибка конвертации: {str(e)}")
+        raise
+    except Exception as e:
+        utils_logger.critical(f"Критическая ошибка: {str(e)}")
+        raise

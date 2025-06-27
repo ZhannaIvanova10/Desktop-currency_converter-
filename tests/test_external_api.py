@@ -1,41 +1,40 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+"""
+Тесты для модуля external_api
+Проверяют корректность конвертации валют
+"""
 
-from unittest.mock import patch, MagicMock
+import pytest
+from decimal import Decimal
 from src.external_api import convert_to_rub
 
-def test_convert_usd_to_rub():
-    with patch('src.external_api.requests.get') as mock_get:
-        mock_response=MagicMock()
-        mock_response.json.return_value={'success': True, 'result': 7500.0}
-        mock_get.return_value=mock_response
+class TestCurrencyConversion:
+    """Тесты конвертации валют"""
 
-        transaction={'amount': 100, 'currency': 'USD'}
-        result=convert_to_rub(transaction)
-        assert result == 7500.0
+    def test_usd_conversion(self):
+        """Проверка конвертации USD в RUB"""
+        assert convert_to_rub({"amount": 100, "currency": "USD"}) == 7500.0
 
-def test_convert_eur_to_rub():
-    with patch('src.external_api.requests.get') as mock_get:
-        mock_response=MagicMock()
-        mock_response.json.return_value={'success': True, 'result': 8500.0}
-        mock_get.return_value=mock_response
+    def test_eur_conversion(self):
+        """Проверка конвертации EUR в RUB"""
+        assert convert_to_rub({"amount": 50, "currency": "EUR"}) == 4250.0
 
-        transaction={'amount': 100, 'currency': 'EUR'}
-        result=convert_to_rub(transaction)
-        assert result == 8500.0
+    def test_rub_conversion(self):
+        """Проверка конвертации RUB в RUB"""
+        assert convert_to_rub({"amount": 1000, "currency": "RUB"}) == 1000.0
 
-def test_already_in_rub():
-    transaction={'amount': 1000, 'currency': 'RUB'}
-    result=convert_to_rub(transaction)
-    assert result == 1000.0
+    def test_invalid_currency(self):
+        """Проверка обработки неизвестной валюты"""
+        with pytest.raises(ValueError):
+            convert_to_rub({"amount": 100, "currency": "GBP"})
 
-def test_invalid_currency():
-    transaction={'amount': 100, 'currency': 'GBP'}
-    result=convert_to_rub(transaction)
-    assert result is None
+    def test_missing_fields(self):
+        """Проверка обработки отсутствующих полей"""
+        with pytest.raises(KeyError):
+            convert_to_rub({"amount": 100})  # Нет currency
+        with pytest.raises(KeyError):
+            convert_to_rub({"currency": "USD"})  # Нет amount
 
-def test_invalid_transaction():
-    assert convert_to_rub({}) is None
-    assert convert_to_rub({'amount': 100}) is None
-    assert convert_to_rub({'currency': 'USD'}) is None
+    def test_decimal_precision(self):
+        """Проверка точности вычислений с Decimal"""
+        result = convert_to_rub({"amount": 100.123, "currency": "USD"})
+        assert result == 7509.225

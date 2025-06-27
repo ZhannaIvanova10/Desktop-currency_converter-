@@ -1,12 +1,25 @@
+"""Utilities module for file operations."""
+
 import json
-from typing import List, Dict
+import logging
+from pathlib import Path
+from typing import List, Dict, Union
 
 
-def load_transactions(file_path: str) -> List[Dict]:
-    """Загружает транзакции из JSON-файла и возвращает список словарей."""
+logger = logging.getLogger(__name__)
+
+
+def read_json_file(file_path: Union[str, Path]) -> List[Dict]:
+    """Чтение JSON файла с транзакциями."""
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            data = json.load(file)
-            return data if isinstance(data, list) else []
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            logger.info("Успешно прочитан файл: %s", file_path)
+            return data
+    except Exception as e:
+        logger.error(
+            "Ошибка чтения файла %s: %s",
+            file_path,
+            str(e),
+            exc_info=True)
+        raise

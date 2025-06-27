@@ -1,9 +1,3 @@
-__pycache__/
-*.py[cod]
-.env
-venv/
-.env
-.coverage
-__pycache__/
-*.pyc
-.idea/
+# Логи
+logs/
+*.log
