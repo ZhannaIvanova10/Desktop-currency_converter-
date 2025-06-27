@@ -1,10 +1,9 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
-from src.external_api import convert_to_rub
 from unittest.mock import patch, MagicMock
+from src.external_api import convert_to_rub
 
 def test_convert_usd_to_rub():
     with patch('src.external_api.requests.get') as mock_get:
