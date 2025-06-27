@@ -1,17 +1,5 @@
 [
-  {
-    "id": 1,
-    "amount": "100.50",
-    "currency": "RUB"
-  },
-  {
-    "id": 2,
-    "amount": "50.00",
-    "currency": "USD"
-  },
-  {
-    "id": 3,
-    "amount": "75.00",
-    "currency": "EUR"
-  }
+    {"id": "1", "amount": 100.0, "currency": "USD"},
+    {"id": "2", "amount": 5000.0, "currency": "RUB"},
+    {"id": "3", "amount": 50.0, "currency": "EUR"}
 ]
